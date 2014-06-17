@@ -29,8 +29,9 @@
     </LinearLayout>
     
     <FrameLayout
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content" >
             <com.echo.my2048.GameView
                 android:id="@+id/gameView"
                 android:layout_width="match_parent"
@@ -47,5 +48,15 @@
                 android:layout_marginRight="10dip"
                 ></com.echo.my2048.AnimationLayer>
     </FrameLayout>
+
+    <TextView android:id="@+id/author"
+        android:layout_width="wrap_content"
+        android:layout_height="0dip"
+        android:layout_marginBottom="10dip"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:textSize="20sp"
+        android:text="jiang echo"
+        />
 
 </LinearLayout>
