@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView android:id="@+id/tvscore"
+        android:layout_width="100dip"
+        android:layout_height="wrap_content"
+        android:text="score"
+        />
+<!--  
+    <GridLayout
+        android:id="@+id/gridlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:columnCount="4"
+        android:rowCount="4"
+        android:orientation="horizontal"
+        android:useDefaultMargins="true"
+        >
+        
+        <TextView 
+            android:text="test"
+            android:layout_gravity="fill"
+            android:background="@color/abc_search_url_text_pressed"
+            />
+
+        <TextView 
+            android:text="test1"
+            android:layout_gravity="fill"
+            />
+        
+        <TextView 
+            android:text="test2"
+            android:layout_gravity="fill"
+            />
+
+        <TextView 
+            android:text="test3"
+            android:layout_gravity="fill"
+            />
+    </GridLayout>
+    -->
+    
+    <com.echo.my2048.GameView
+        android:id="@+id/gameView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:useDefaultMargins="true"
+       ></com.echo.my2048.GameView>
+
+<!-- 
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button" />
+  -->
+</LinearLayout>
