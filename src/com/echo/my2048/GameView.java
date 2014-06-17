@@ -80,7 +80,7 @@ public class GameView extends GridLayout implements SwipeListener{
 		
 		if (!initialized) {
 			initialized = true;
-			cardHeight = cardWith = (w - 50) / 4 ;
+			cardHeight = cardWith = (w - 20) / 4 ;
 			initCards(cardHeight, cardHeight);
 			start();
 		}

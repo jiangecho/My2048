@@ -4,6 +4,9 @@ import com.echo.my2048.R;
 
 import android.R.string;
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,6 +26,9 @@ public class MainActivity extends Activity implements GameEventListner{
 	private GameView gameView;
 	private AnimationLayer animationLayer;
 	private TextView scoreView;
+	private TextView bestScoreView;
+
+	private static final String BEST_SCORE = "BSET_SCORE";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,11 @@ public class MainActivity extends Activity implements GameEventListner{
 		gameView.initGame(4);
 		
 		scoreView = (TextView) findViewById(R.id.scoreView);
+		bestScoreView = (TextView) findViewById(R.id.bsetScoreView);
+
+		SharedPreferences sharedPreferences = getSharedPreferences("2048", Context.MODE_PRIVATE);
+		int score = sharedPreferences.getInt(BEST_SCORE, 0);
+		bestScoreView.setText("Best Score: " + score);
 
 	}
 
@@ -70,16 +81,30 @@ public class MainActivity extends Activity implements GameEventListner{
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
+		saveScore();
+		
+	}
+	
+	private void saveScore(){
+		SharedPreferences sharedPreferences = getSharedPreferences("2048", Context.MODE_PRIVATE);
+
+		int currentScore = gameView.getScore();
+		int bestScore = sharedPreferences.getInt(BEST_SCORE, 0);
+
+		if (currentScore > bestScore) {
+			sharedPreferences.edit().putInt(BEST_SCORE, currentScore).commit();
+		}
+		
 	}
 
 	@Override
 	public void onGameOver() {
 		Toast.makeText(this, "game over", Toast.LENGTH_LONG).show();
+		saveScore();
 	}
 
 	@Override
 	public void onScoreUpdate(int score) {
 		this.scoreView.setText("Score: " + score);
 	}
-
 }

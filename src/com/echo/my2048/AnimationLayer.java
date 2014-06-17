@@ -63,7 +63,7 @@ public class AnimationLayer extends GridLayout {
 		
 		if (!initialized) {
 			initialized = true;
-			cardHeight = cardWith = (w - 50) / 4 ;
+			cardHeight = cardWith = (w - 20) / 4 ;
 			initCards(cardHeight, cardHeight);
 		}
 	}
