@@ -4,7 +4,9 @@ import com.echo.my2048.R;
 
 import android.R.string;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -99,8 +101,26 @@ public class MainActivity extends Activity implements GameEventListner{
 
 	@Override
 	public void onGameOver() {
-		Toast.makeText(this, "game over", Toast.LENGTH_LONG).show();
 		saveScore();
+		AlertDialog dialog = new AlertDialog.Builder(this).create();
+		dialog.setTitle("game over");
+		dialog.setMessage("game over");
+		dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "quit", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+				
+			}
+		});
+		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "restart", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				gameView.resetGame();
+			}
+		});
+		dialog.show();
 	}
 
 	@Override

@@ -60,6 +60,20 @@ public class GameView extends GridLayout implements SwipeListener{
 		
 	}
 	
+	public void resetGame(){
+		this.score = 0;
+		for (int i = 0; i < cardMatrix.length; i++) {
+			for (int j = 0; j < cardMatrix[0].length; j++) {
+				cardMatrix[i][j].setAndDisplayNum(0);
+			}
+		}
+		
+		// start
+		addRondomNum();
+		addRondomNum();
+	}
+	
+	
 	private void initCards(int width, int height){
 		
 		cardMatrix = new Card[columnCount][columnCount];
@@ -82,17 +96,13 @@ public class GameView extends GridLayout implements SwipeListener{
 			initialized = true;
 			cardHeight = cardWith = (w - 20) / 4 ;
 			initCards(cardHeight, cardHeight);
-			start();
+
+			// start
+			addRondomNum();
+			addRondomNum();
 		}
 	}
 	
-	private int randomNum(){
-		if (new Random().nextBoolean()) {
-			return 2;
-		}else {
-			return 4;
-		}
-	}
 	
 	private boolean isGameOver(){
 		boolean over = true;
@@ -175,24 +185,6 @@ public class GameView extends GridLayout implements SwipeListener{
 		
 	}
 	
-	private void start(){
-		Random random = new Random();
-		int x, y;
-		
-		while(true){
-			x = random.nextInt(columnCount * columnCount);
-			y = random.nextInt(columnCount * columnCount);
-			
-			if (x != y) {
-				cardMatrix[x / columnCount][x % columnCount].setAndDisplayNum(randomNum());
-				cardMatrix[y / columnCount][y % columnCount].setAndDisplayNum(randomNum());
-				break;
-			}
-		}
-	}
-	
-
-
 	@Override
 	public void swipeRight(View v) {
 		Card fromCard, toCard = null;
