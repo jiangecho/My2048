@@ -4,15 +4,13 @@ import java.util.Random;
 
 import com.echo.my2048.SwipeDetector.SwipeListener;
 
-import android.R.bool;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
+import android.view.animation.ScaleAnimation;
 import android.widget.GridLayout;
-import android.widget.Toast;
 
 public class GameView extends GridLayout implements SwipeListener{
 	
@@ -22,32 +20,35 @@ public class GameView extends GridLayout implements SwipeListener{
 	
 	private boolean initialized = false;
 	
+	private int score = 0;
+	
 	private SwipeDetector swipeDetector;
+	
+	private AnimationLayer animationLayer;
+	private GameEventListner gameEventListner;
 
 	public GameView(Context context) {
 		super(context);
-		init(Config.ROW_COUNT, Config.COLUMN_COUNT);
 	}
 	
 	
 	public GameView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		init(Config.ROW_COUNT, Config.COLUMN_COUNT);
 	}
 
 
 	public GameView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init(Config.ROW_COUNT, Config.COLUMN_COUNT);
+	}
+	
+	public void setGameOverListner(GameEventListner listner){
+		this.gameEventListner = listner;
 	}
 
 
-	private void init(int rows, int columns){
-//		setRowCount(rows);
-//		setColumnCount(columns);
-//		
-//		cardMatrix = new Card[rows][columns];
-		
+	
+	public void setAnimationLayer(AnimationLayer animationLayer){
+		this.animationLayer = animationLayer;
 	}
 	
 	public void initGame(int columnCount) {
@@ -63,11 +64,6 @@ public class GameView extends GridLayout implements SwipeListener{
 		
 		cardMatrix = new Card[columnCount][columnCount];
 		
-//		cardMatrix[0][0] = new Card(getContext());
-//		addView(cardMatrix[0][0], width, height);
-//		cardMatrix[0][3] = new Card(getContext());
-//		addView(cardMatrix[0][3], width, height);
-
 		for (int i = 0; i < cardMatrix.length; i++) {
 			for (int j = 0; j < cardMatrix[0].length; j++) {
 				
@@ -90,42 +86,6 @@ public class GameView extends GridLayout implements SwipeListener{
 		}
 	}
 	
-	private void applyMoveAnimation(final Card fromCard, final Card toCard){
-		
-		float x1, x2, y1, y2;
-		x1 = fromCard.getX();
-		x2 = toCard.getX();
-		y1 = fromCard.getY();
-		y2 = toCard.getY();
-		
-		
-		//TranslateAnimation translateAnimation = new TranslateAnimation(fromCard.getX(), toCard.getX(), fromCard.getY(), toCard.getY());
-		TranslateAnimation translateAnimation = new TranslateAnimation(x1, x2, y1, y2);
-		translateAnimation.setDuration(500);
-		translateAnimation.setFillAfter(true);
-		translateAnimation.setAnimationListener(new AnimationListener() {
-			
-			@Override
-			public void onAnimationStart(Animation animation) {
-			}
-			
-			@Override
-			public void onAnimationRepeat(Animation animation) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				//fromCard.display();
-				toCard.display();
-			}
-		});
-		
-		fromCard.startAnimation(translateAnimation);
-	}
-	
-	
 	private int randomNum(){
 		if (new Random().nextBoolean()) {
 			return 2;
@@ -139,24 +99,37 @@ public class GameView extends GridLayout implements SwipeListener{
 		for (int i = 0; i < columnCount; i++) {
 			for (int j = 0; j < columnCount; j++) {
 				if(cardMatrix[i][j].getNum() == 0){
-					over = false;
-					break;
+					return false;
 				}
 			}
-
+		}
+		
+		//row
+		for (int i = 0; i < columnCount; i++) {
+			for (int j = 0; j < columnCount - 1; j++) {
+				if (cardMatrix[i][j].equals(cardMatrix[i][j + 1])) {
+					return false;
+				}
+			}
+		}
+		
+		//column
+		for (int i = 0; i < columnCount; i++) {
+			for (int j = 0; j < columnCount - 1; j++) {
+				if (cardMatrix[j][i].equals(cardMatrix[j + 1][i])) {
+					return false;
+				}
+			}
 		}
 		
 		return over;
 	}
 	
 	private void addRondomNum(){
+		final Card card;
 		Random random = new Random();
-		int x, y;
+		int x, y, num;
 		
-		if (isGameOver()) {
-			//TODO game over
-			return;
-		}
 		
 		x = random.nextInt(4);
 		y = random.nextInt(4);
@@ -165,8 +138,40 @@ public class GameView extends GridLayout implements SwipeListener{
 			x = random.nextInt(4);
 			y = random.nextInt(4);
 		}
-
-		cardMatrix[x][y].setAndDisplayNum(random.nextBoolean() ? 2 : 4);
+		
+		if (random.nextInt(5) < 4) {
+			num = 2;
+		}else {
+			num = 4;
+		}
+		
+		cardMatrix[x][y].setNum(num);
+		card = cardMatrix[x][y];
+		
+		ScaleAnimation scaleAnimation = new ScaleAnimation(0.5f, 1f, 0.5f, 1f);
+		scaleAnimation.setDuration(200);
+		scaleAnimation.setAnimationListener(new AnimationListener() {
+			
+			@Override
+			public void onAnimationStart(Animation animation) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				// TODO Auto-generated method stub
+				card.display();
+				
+			}
+		});
+		card.startAnimation(scaleAnimation);
 		
 	}
 	
@@ -174,19 +179,16 @@ public class GameView extends GridLayout implements SwipeListener{
 		Random random = new Random();
 		int x, y;
 		
-		// TODO 
-		// the (x, y) maybe the same
-		for (int i = 0; i < 2; i++) {
-			x = random.nextInt(3);
-			y = random.nextInt(3);
+		while(true){
+			x = random.nextInt(columnCount * columnCount);
+			y = random.nextInt(columnCount * columnCount);
 			
-			cardMatrix[x][y].setAndDisplayNum(randomNum());
+			if (x != y) {
+				cardMatrix[x / columnCount][x % columnCount].setAndDisplayNum(randomNum());
+				cardMatrix[y / columnCount][y % columnCount].setAndDisplayNum(randomNum());
+				break;
+			}
 		}
-		
-//			cardMatrix[1][0].setAndDisplayNum(2);
-//			cardMatrix[1][1].setAndDisplayNum(2);
-
-		
 	}
 	
 
@@ -195,15 +197,16 @@ public class GameView extends GridLayout implements SwipeListener{
 	public void swipeRight(View v) {
 		Card fromCard, toCard = null;
 		boolean addNewNum = false;
+		int i, j, k, animationNum;
 		
 		//row
-		for (int i = 0; i < columnCount; i++) {
+		for (i = 0; i < columnCount; i++) {
 			//column
-			for (int j = columnCount - 2; j >= 0; j--) {
+			for (j = columnCount - 2; j >= 0; j--) {
 				fromCard = cardMatrix[i][j];
 				if (fromCard.getNum() > 0) {
 					toCard = null;
-					for (int k = j + 1; k < columnCount; k++) {
+					for (k = j + 1; k < columnCount; k++) {
 						if (cardMatrix[i][k].getNum() == 0) {
 							toCard = cardMatrix[i][k];
 							continue;
@@ -216,12 +219,18 @@ public class GameView extends GridLayout implements SwipeListener{
 						}
 					}
 					if (toCard != null) {
-						toCard.setNum(fromCard.getNum() + toCard.getNum());
-						fromCard.setNum(0);
-						applyMoveAnimation(fromCard, toCard);
 						
-//						toCard.setAndDisplayNum(fromCard.getNum() + toCard.getNum());
-//						fromCard.setAndDisplayNum(0);
+						if (fromCard.equals(toCard)) {
+							this.score += fromCard.getNum() * 2;
+							if (this.gameEventListner != null) {
+								gameEventListner.onScoreUpdate(this.score);
+							}
+						}
+						
+						toCard.setNum(fromCard.getNum() + toCard.getNum());
+						animationNum = fromCard.getNum();
+						fromCard.setNum(0);
+						animationLayer.applyMoveAnimation(i, j, fromCard, toCard, animationNum);
 
 						addNewNum = true;
 					}
@@ -235,6 +244,10 @@ public class GameView extends GridLayout implements SwipeListener{
 		}
 		if (addNewNum) {
 			addRondomNum();
+		}
+
+		if (isGameOver()) {
+			gameEventListner.onGameOver();
 		}
 	}
 
@@ -243,16 +256,17 @@ public class GameView extends GridLayout implements SwipeListener{
 	public void swipeLeft(View v) {
 		Card fromCard, toCard = null;
 		boolean addNewNum = false;
+		int i, j, k, animationNum;
 		
 		//row
-		for (int i = 0; i < columnCount; i++) {
+		for (i = 0; i < columnCount; i++) {
 			//column
-			//for (int j = columnCount - 2; j >= 0; j--) {
-			for (int j = 1; j < columnCount; j++) {
+			//for (j = columnCount - 2; j >= 0; j--) {
+			for (j = 1; j < columnCount; j++) {
 				fromCard = cardMatrix[i][j];
 				if (fromCard.getNum() > 0) {
 					toCard = null;
-					for (int k = j - 1; k >=0 ; k--) {
+					for (k = j - 1; k >=0 ; k--) {
 						if (cardMatrix[i][k].getNum() == 0) {
 							toCard = cardMatrix[i][k];
 							continue;
@@ -266,12 +280,18 @@ public class GameView extends GridLayout implements SwipeListener{
 						}
 					}
 					if (toCard != null) {
-//						toCard.setNum(fromCard.getNum() + toCard.getNum());
-//						fromCard.setNum(0);
-//						applyMoveAnimation(fromCard, toCard);
 
-						toCard.setAndDisplayNum(fromCard.getNum() + toCard.getNum());
-						fromCard.setAndDisplayNum(0);
+						if (fromCard.equals(toCard)) {
+							this.score += fromCard.getNum() * 2;
+							if (this.gameEventListner != null) {
+								gameEventListner.onScoreUpdate(this.score);
+							}
+						}
+
+						toCard.setNum(fromCard.getNum() + toCard.getNum());
+						animationNum = fromCard.getNum();
+						fromCard.setNum(0);
+						animationLayer.applyMoveAnimation(i, j, fromCard, toCard, animationNum);
 
 						addNewNum = true;
 					}
@@ -286,6 +306,10 @@ public class GameView extends GridLayout implements SwipeListener{
 		}
 		if (addNewNum) {
 			addRondomNum();
+		}
+		
+		if (isGameOver()) {
+			gameEventListner.onGameOver();
 		}
 		
 	}
@@ -295,15 +319,16 @@ public class GameView extends GridLayout implements SwipeListener{
 	public void swipeUp(View v) {
 		Card fromCard, toCard = null;
 		boolean addNewNum = false;
+		int i, j, k, animationNum;
 		
 		//column
-		for (int i = 0; i < columnCount; i++) {
+		for (i = 0; i < columnCount; i++) {
 			//row
-			for (int j = 1; j < columnCount; j++) {
+			for (j = 1; j < columnCount; j++) {
 				fromCard = cardMatrix[j][i];
 				if (fromCard.getNum() > 0) {
 					toCard = null;
-					for (int k = j - 1; k >=0 ; k--) {
+					for (k = j - 1; k >=0 ; k--) {
 						if (cardMatrix[k][i].getNum() == 0) {
 							toCard = cardMatrix[k][i];
 							continue;
@@ -317,12 +342,18 @@ public class GameView extends GridLayout implements SwipeListener{
 						}
 					}
 					if (toCard != null) {
-//						toCard.setNum(fromCard.getNum() + toCard.getNum());
-//						fromCard.setNum(0);
-//						applyMoveAnimation(fromCard, toCard);
 
-						toCard.setAndDisplayNum(fromCard.getNum() + toCard.getNum());
-						fromCard.setAndDisplayNum(0);
+						if (fromCard.equals(toCard)) {
+							this.score += fromCard.getNum() * 2;
+							if (this.gameEventListner != null) {
+								gameEventListner.onScoreUpdate(this.score);
+							}
+						}
+
+						toCard.setNum(fromCard.getNum() + toCard.getNum());
+						animationNum = fromCard.getNum();
+						fromCard.setNum(0);
+						animationLayer.applyMoveAnimation(j, i, fromCard, toCard, animationNum);
 
 						addNewNum = true;
 					}
@@ -330,13 +361,15 @@ public class GameView extends GridLayout implements SwipeListener{
 				}else {
 					continue;
 				}
-
-				
 			}
 			
 		}
 		if (addNewNum) {
 			addRondomNum();
+		}
+
+		if (isGameOver()) {
+			gameEventListner.onGameOver();
 		}
 		
 	}
@@ -346,15 +379,16 @@ public class GameView extends GridLayout implements SwipeListener{
 	public void swipeDown(View v) {
 		Card fromCard, toCard = null;
 		boolean addNewNum = false;
+		int i, j, k, animationNum;
 		
 		//column
-		for (int i = 0; i < columnCount; i++) {
+		for (i = 0; i < columnCount; i++) {
 			//row
-			for (int j = columnCount - 2; j >= 0; j--) {
+			for (j = columnCount - 2; j >= 0; j--) {
 				fromCard = cardMatrix[j][i];
 				if (fromCard.getNum() > 0) {
 					toCard = null;
-					for (int k = j + 1; k < columnCount ; k++) {
+					for (k = j + 1; k < columnCount ; k++) {
 						if (cardMatrix[k][i].getNum() == 0) {
 							toCard = cardMatrix[k][i];
 							continue;
@@ -368,12 +402,18 @@ public class GameView extends GridLayout implements SwipeListener{
 						}
 					}
 					if (toCard != null) {
-//						toCard.setNum(fromCard.getNum() + toCard.getNum());
-//						fromCard.setNum(0);
-//						applyMoveAnimation(fromCard, toCard);
 
-						toCard.setAndDisplayNum(fromCard.getNum() + toCard.getNum());
-						fromCard.setAndDisplayNum(0);
+						if (fromCard.equals(toCard)) {
+							this.score += fromCard.getNum() * 2;
+							if (this.gameEventListner != null) {
+								gameEventListner.onScoreUpdate(this.score);
+							}
+						}
+
+						toCard.setNum(fromCard.getNum() + toCard.getNum());
+						animationNum = fromCard.getNum();
+						fromCard.setNum(0);
+						animationLayer.applyMoveAnimation(j, i, fromCard, toCard, animationNum);
 
 						addNewNum = true;
 					}
@@ -381,15 +421,25 @@ public class GameView extends GridLayout implements SwipeListener{
 				}else {
 					continue;
 				}
-
-				
 			}
 			
 		}
 		if (addNewNum) {
 			addRondomNum();
 		}
-		
+
+		if (isGameOver()) {
+			gameEventListner.onGameOver();
+		}
+	}
+	
+	public int getScore(){
+		return this.score;
+	}
+	
+	public interface GameEventListner{
+		public void onGameOver();
+		public void onScoreUpdate(int score);
 	}
 
 }

@@ -1,6 +1,8 @@
 package com.echo.my2048;
+import com.echo.my2048.GameView.GameEventListner;
 import com.echo.my2048.R;
 
+import android.R.string;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,13 +14,15 @@ import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity implements GameEventListner{
 
-	private Button button;
-	private LinearLayout linearLayout;
 	private GameView gameView;
+	private AnimationLayer animationLayer;
+	private TextView scoreView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,55 +30,16 @@ public class MainActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 		
+		animationLayer = (AnimationLayer) findViewById(R.id.animationLayer);
+		animationLayer.init(4);
+
 		gameView = (GameView) findViewById(R.id.gameView);
+		gameView.setAnimationLayer(animationLayer);
+		gameView.setGameOverListner(this);
 		gameView.initGame(4);
-//		//GridLayout gridLayout = (GridLayout) findViewById(R.id.gridlayout);
-//		button = (Button) findViewById(R.id.button1);
-//		
-//		linearLayout = (LinearLayout) findViewById(R.id.linearlayout);
-//		
-//		final Button button2 = new Button(this);
-//		button2.setText("button2");
-//		LayoutParams lParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-//		linearLayout.addView(button2,lParams);
-//
-//		button2.setOnClickListener(new OnClickListener() {
-//			
-//			@Override
-//			public void onClick(View v) {
-//				//TranslateAnimation translateAnimation = new TranslateAnimation(fromXDelta, toXDelta, fromYDelta, toYDelta);
-//				TranslateAnimation translateAnimation = new TranslateAnimation(button.getX(), button.getX() + 100, 
-//						button.getY(), button.getY() + 200);
-//				translateAnimation.setDuration(500);
-//				translateAnimation.setAnimationListener(new AnimationListener() {
-//					
-//					@Override
-//					public void onAnimationStart(Animation animation) {
-//						// TODO Auto-generated method stub
-//						
-//					}
-//					
-//					@Override
-//					public void onAnimationRepeat(Animation animation) {
-//						// TODO Auto-generated method stub
-//						
-//					}
-//					
-//					@Override
-//					public void onAnimationEnd(Animation animation) {
-//						// TODO Auto-generated method stub
-//						//button2.setX(button2.getX() + 100);
-//						//button2.setY(button2.getY() + 100);
-//						button2.clearAnimation();
-//						//button2.layout(button2.getLeft() + 100, button2.getTop() + 100, button2.getRight() - 100, button2.getBottom() - 100);
-//						
-//					}
-//				});
-//				button2.startAnimation(translateAnimation);
-//			}
-//		});
 		
-		
+		scoreView = (TextView) findViewById(R.id.scoreView);
+
 	}
 
 	@Override
@@ -105,6 +70,16 @@ public class MainActivity extends Activity{
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
+	}
+
+	@Override
+	public void onGameOver() {
+		Toast.makeText(this, "game over", Toast.LENGTH_LONG).show();
+	}
+
+	@Override
+	public void onScoreUpdate(int score) {
+		this.scoreView.setText("Score: " + score);
 	}
 
 }
