@@ -21,7 +21,6 @@ public class GameView extends GridLayout implements SwipeListener{
 	private boolean initialized = false;
 	
 	private int score = 0;
-	private String state = null;
 	
 	private SwipeDetector swipeDetector;
 	
@@ -52,7 +51,7 @@ public class GameView extends GridLayout implements SwipeListener{
 		this.animationLayer = animationLayer;
 	}
 	
-	public void initGameView(int columnCount) {
+	public void initGame(int columnCount) {
 		this.columnCount = columnCount;
 		setColumnCount(columnCount);
 
@@ -79,32 +78,13 @@ public class GameView extends GridLayout implements SwipeListener{
 		
 		cardMatrix = new Card[columnCount][columnCount];
 		
-		if (this.state != null) {
-			String[] values = this.state.split(" ");
-			this.score = Integer.valueOf(values[1]).intValue();
-
-			for (int i = 0; i < cardMatrix.length; i++) {
-				for (int j = 0; j < cardMatrix[0].length; j++) {
+		for (int i = 0; i < cardMatrix.length; i++) {
+			for (int j = 0; j < cardMatrix[0].length; j++) {
 				
-					cardMatrix[i][j] = new Card(getContext());
-					cardMatrix[i][j].setAndDisplayNum(Integer.valueOf(values[2 + i * columnCount + j]));
-					addView(cardMatrix[i][j], cardWith, cardHeight);
-				}
+				cardMatrix[i][j] = new Card(getContext());
+				addView(cardMatrix[i][j], cardWith, cardHeight);
 			}
 			
-			this.state = null;
-		}else {
-			for (int i = 0; i < cardMatrix.length; i++) {
-				for (int j = 0; j < cardMatrix[0].length; j++) {
-				
-					cardMatrix[i][j] = new Card(getContext());
-					addView(cardMatrix[i][j], cardWith, cardHeight);
-				}
-			}
-			
-			// start
-			addRondomNum();
-			addRondomNum();
 		}
 	}
 
@@ -116,11 +96,15 @@ public class GameView extends GridLayout implements SwipeListener{
 			initialized = true;
 			cardHeight = cardWith = (w - 20) / 4 ;
 			initCards(cardHeight, cardHeight);
+
+			// start
+			addRondomNum();
+			addRondomNum();
 		}
 	}
 	
 	
-	public boolean isGameOver(){
+	private boolean isGameOver(){
 		boolean over = true;
 		for (int i = 0; i < columnCount; i++) {
 			for (int j = 0; j < columnCount; j++) {
@@ -443,26 +427,6 @@ public class GameView extends GridLayout implements SwipeListener{
 	
 	public int getScore(){
 		return this.score;
-	}
-	
-	public String getGameState(){
-		StringBuffer sb = new StringBuffer();
-		sb.append(columnCount);
-		sb.append(' ');
-		sb.append(this.score);
-		sb.append(' ');
-		for (int i = 0; i < columnCount; i++) {
-			for (int j = 0; j < columnCount; j++) {
-				sb.append(cardMatrix[i][j].getNum());
-				sb.append(' ');
-			}
-		}
-		return sb.toString();
-	}
-	
-	public void setGameState(String state){
-		//TODO
-		this.state = state;
 	}
 	
 	public interface GameEventListner{

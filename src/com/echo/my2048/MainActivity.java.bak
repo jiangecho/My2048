@@ -7,7 +7,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.widget.TextView;
@@ -24,9 +23,6 @@ public class MainActivity extends Activity implements GameEventListner{
 	private long lastBackKeyPressTime = 0;
 
 	private static final String BEST_SCORE = "BSET_SCORE";
-	private static final String GAME_STATE = "GAME_STATE";
-	
-	private SharedPreferences sharedPreferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +36,14 @@ public class MainActivity extends Activity implements GameEventListner{
 		gameView = (GameView) findViewById(R.id.gameView);
 		gameView.setAnimationLayer(animationLayer);
 		gameView.setGameOverListner(this);
-		gameView.initGameView(4);
+		gameView.initGame(4);
 		
 		scoreView = (TextView) findViewById(R.id.scoreView);
 		bestScoreView = (TextView) findViewById(R.id.bsetScoreView);
 
-		sharedPreferences = getSharedPreferences("2048", Context.MODE_PRIVATE);
+		SharedPreferences sharedPreferences = getSharedPreferences("2048", Context.MODE_PRIVATE);
+		int score = sharedPreferences.getInt(BEST_SCORE, 0);
+		bestScoreView.setText("Best Score: " + score);
 
 	}
 
@@ -57,25 +55,14 @@ public class MainActivity extends Activity implements GameEventListner{
 
 	@Override
 	protected void onPause() {
+		// TODO Auto-generated method stub
 		super.onPause();
-		saveGameState();
 	}
 
 	@Override
 	protected void onResume() {
+		// TODO Auto-generated method stub
 		super.onResume();
-
-		int score = sharedPreferences.getInt(BEST_SCORE, 0);
-		bestScoreView.setText("Best Score: " + score);
-		
-		String state = sharedPreferences.getString(GAME_STATE, null);
-		if (state != null) {
-			String[] values = state.split(" ");
-			scoreView.setText("Score: " + values[1]);
-			
-			gameView.setGameState(state);
-		}
-
 	}
 
 	@Override
@@ -88,33 +75,25 @@ public class MainActivity extends Activity implements GameEventListner{
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
+		saveScore();
 		
 	}
 	
-	private void saveGameState(){
+	private void saveScore(){
+		SharedPreferences sharedPreferences = getSharedPreferences("2048", Context.MODE_PRIVATE);
 
 		int currentScore = gameView.getScore();
 		int bestScore = sharedPreferences.getInt(BEST_SCORE, 0);
 
-		Editor editor = sharedPreferences.edit();
 		if (currentScore > bestScore) {
-			editor.putInt(BEST_SCORE, currentScore);
+			sharedPreferences.edit().putInt(BEST_SCORE, currentScore).commit();
 		}
-		
-		if (gameView.isGameOver()) {
-			editor.remove(GAME_STATE);
-		}else {
-			String state = gameView.getGameState();
-			editor.putString(GAME_STATE, state);
-		}
-		
-		editor.commit();
 		
 	}
 
 	@Override
 	public void onGameOver() {
-		saveGameState();
+		saveScore();
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
 		dialog.setTitle("game over");
 		dialog.setMessage("game over");
@@ -140,6 +119,8 @@ public class MainActivity extends Activity implements GameEventListner{
 	public void onScoreUpdate(int score) {
 		this.scoreView.setText("Score: " + score);
 	}
+	
+	
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
