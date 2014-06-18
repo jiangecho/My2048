@@ -18,8 +18,11 @@ public class MainActivity extends Activity implements GameEventListner{
 
 	private GameView gameView;
 	private AnimationLayer animationLayer;
+
 	private TextView scoreView;
 	private TextView bestScoreView;
+	
+	private int bestScore = 0;
 	
 	private long lastBackKeyPressTime = 0;
 
@@ -47,6 +50,18 @@ public class MainActivity extends Activity implements GameEventListner{
 
 		sharedPreferences = getSharedPreferences("2048", Context.MODE_PRIVATE);
 
+		bestScore = sharedPreferences.getInt(BEST_SCORE, 0);
+		bestScoreView.setText("Best Score: " + this.bestScore);
+
+		String state = sharedPreferences.getString(GAME_STATE, null);
+		if (state != null) {
+			String[] values = state.split(" ");
+			scoreView.setText("Score: " + values[1]);
+			
+			gameView.setGameState(state);
+		}else {
+			scoreView.setText("Score: " + 0);
+		}
 	}
 
 	@Override
@@ -64,18 +79,6 @@ public class MainActivity extends Activity implements GameEventListner{
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		int score = sharedPreferences.getInt(BEST_SCORE, 0);
-		bestScoreView.setText("Best Score: " + score);
-		
-		String state = sharedPreferences.getString(GAME_STATE, null);
-		if (state != null) {
-			String[] values = state.split(" ");
-			scoreView.setText("Score: " + values[1]);
-			
-			gameView.setGameState(state);
-		}
-
 	}
 
 	@Override
@@ -93,13 +96,8 @@ public class MainActivity extends Activity implements GameEventListner{
 	
 	private void saveGameState(){
 
-		int currentScore = gameView.getScore();
-		int bestScore = sharedPreferences.getInt(BEST_SCORE, 0);
-
 		Editor editor = sharedPreferences.edit();
-		if (currentScore > bestScore) {
-			editor.putInt(BEST_SCORE, currentScore);
-		}
+		editor.putInt(BEST_SCORE, bestScore);
 		
 		if (gameView.isGameOver()) {
 			editor.remove(GAME_STATE);
@@ -118,7 +116,7 @@ public class MainActivity extends Activity implements GameEventListner{
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
 		dialog.setTitle("game over");
 		dialog.setMessage("game over");
-		dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "quit", new DialogInterface.OnClickListener() {
+		dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "quit", new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -126,10 +124,11 @@ public class MainActivity extends Activity implements GameEventListner{
 				
 			}
 		});
-		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "restart", new DialogInterface.OnClickListener() {
+		dialog.setButton(DialogInterface.BUTTON_POSITIVE, "restart", new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				scoreView.setText("Score: " + 0);
 				gameView.resetGame();
 			}
 		});
@@ -138,6 +137,10 @@ public class MainActivity extends Activity implements GameEventListner{
 
 	@Override
 	public void onScoreUpdate(int score) {
+		if (score > this.bestScore) {
+			this.bestScore = score;
+			bestScoreView.setText("Best Score: " + this.bestScore);
+		}
 		this.scoreView.setText("Score: " + score);
 	}
 
@@ -157,5 +160,4 @@ public class MainActivity extends Activity implements GameEventListner{
 		
 		return true;
 	}
-
 }
