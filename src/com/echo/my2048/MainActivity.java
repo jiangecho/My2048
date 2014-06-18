@@ -2,23 +2,13 @@ package com.echo.my2048;
 import com.echo.my2048.GameView.GameEventListner;
 import com.echo.my2048.R;
 
-import android.R.string;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
-import android.widget.Button;
-import android.widget.GridLayout;
-import android.widget.LinearLayout;
+import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +19,8 @@ public class MainActivity extends Activity implements GameEventListner{
 	private AnimationLayer animationLayer;
 	private TextView scoreView;
 	private TextView bestScoreView;
+	
+	private long lastBackKeyPressTime = 0;
 
 	private static final String BEST_SCORE = "BSET_SCORE";
 
@@ -127,4 +119,24 @@ public class MainActivity extends Activity implements GameEventListner{
 	public void onScoreUpdate(int score) {
 		this.scoreView.setText("Score: " + score);
 	}
+	
+	
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		long current = 0;
+		long MAX_TIME = 500;
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			current = System.currentTimeMillis();
+			if (current - this.lastBackKeyPressTime < MAX_TIME ) {
+				finish();
+			}else {
+				this.lastBackKeyPressTime = current;
+				Toast.makeText(this, "Press again to exit!", Toast.LENGTH_LONG).show();;
+			}
+		}
+		
+		return true;
+	}
+
 }
